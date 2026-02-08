@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Health Predictor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto;
+}
+
+body{
+background:#f5f5f7;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+.container{
+width:100%;
+max-width:520px;
+padding:40px 28px;
+background:white;
+border-radius:28px;
+box-shadow:0 25px 60px rgba(0,0,0,0.08);
+text-align:center;
+}
+
+h1{font-size:28px;margin-bottom:8px;}
+.sub{color:#6e6e73;margin-bottom:25px;}
+
+.form-page label{
+display:block;
+text-align:left;
+font-size:13px;
+font-weight:600;
+color:#6e6e73;
+margin-top:15px;
+}
+
+select,input{
+width:100%;
+padding:14px;
+margin-top:5px;
+border-radius:12px;
+border:1px solid #e5e5e7;
+background:#fafafa;
+font-size:16px;
+}
+
+button{
+width:100%;
+margin-top:25px;
+padding:14px;
+border:none;
+border-radius:14px;
+background:#0071e3;
+color:white;
+font-weight:600;
+font-size:16px;
+cursor:pointer;
+}
+
+.loading-page{display:none}
+.spinner{
+width:70px;
+height:70px;
+border:7px solid #eee;
+border-top:7px solid #0071e3;
+border-radius:50%;
+margin:40px auto;
+animation:spin 1s linear infinite;
+}
+@keyframes spin{
+0%{transform:rotate(0deg)}
+100%{transform:rotate(360deg)}
+}
+
+.loading-text{
+font-size:16px;
+color:#6e6e73;
+margin-top:10px;
+}
+
+.result-page{display:none}
+.result-card{
+background:#f2f2f2;
+padding:14px;
+margin:12px 0;
+border-radius:14px;
+font-size:15px;
+}
+
+.category{
+font-size:18px;
+margin-top:10px;
+font-weight:600;
+}
+
+.risk{
+font-size:16px;
+margin-top:5px;
+color:#0071e3;
+}
+
+.back{
+background:#111;
+margin-top:20px;
+}
+
+@media(max-width:480px){
+.container{
+padding:25px 18px;
+border-radius:18px;
+}
+h1{font-size:22px}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="form-page" id="formPage">
+<h1>AI Health Predictor</h1>
+<div class="sub">Enter details for AI diagnosis</div>
+
+<form id="predictForm">
+
+<label>Fever</label>
+<select name="Fever"><option>No</option><option>Yes</option></select>
+
+<label>Cough</label>
+<select name="Cough"><option>No</option><option>Yes</option></select>
+
+<label>Fatigue</label>
+<select name="Fatigue"><option>No</option><option>Yes</option></select>
+
+<label>Difficulty Breathing</label>
+<select name="Difficulty Breathing"><option>No</option><option>Yes</option></select>
+
+<label>Age</label>
+<input type="number" name="Age" required>
+
+<label>Gender</label>
+<select name="Gender"><option>Male</option><option>Female</option></select>
+
+<label>Blood Pressure</label>
+<select name="Blood Pressure">
+<option>Low</option><option>Normal</option><option>High</option>
+</select>
+
+<label>Cholesterol</label>
+<select name="Cholesterol">
+<option>Normal</option><option>High</option>
+</select>
+
+<button type="submit">Analyze with AI</button>
+</form>
+</div>
+
+<div class="loading-page" id="loadingPage">
+<h1>AI Processing</h1>
+<div class="spinner"></div>
+<div class="loading-text" id="loadingText">Analyzing symptoms...</div>
+</div>
+
+<div class="result-page" id="resultPage">
+<h1>AI Health Report</h1>
+
+<div class="category" id="categoryText"></div>
+<div class="risk" id="riskText"></div>
+
+<br>
+<h3>🧠 Top 3 Predictions</h3>
+<div id="top3Box"></div>
+
+<button class="back" onclick="location.reload()">← New Prediction</button>
+</div>
+
+</div>
+
+<script>
+const steps = [
+"🔍 Scanning symptoms...",
+"🧠 Running neural analysis...",
+"📊 Matching disease patterns...",
+"🧬 Checking risk factors...",
+"📑 Generating AI medical report..."
+];
+
+document.getElementById("predictForm").addEventListener("submit", async function(e){
+e.preventDefault();
+
+document.getElementById("formPage").style.display="none";
+document.getElementById("loadingPage").style.display="block";
+
+const formData = new FormData(this);
+
+let i=0;
+const text=document.getElementById("loadingText");
+
+const loadingLoop=setInterval(()=>{
+text.innerText=steps[i];
+i++;
+if(i>=steps.length) i=0;
+},1200);
+
+const response=await fetch("/predict",{method:"POST",body:formData});
+const data=await response.json();
+
+setTimeout(()=>{
+clearInterval(loadingLoop);
+
+document.getElementById("loadingPage").style.display="none";
+document.getElementById("resultPage").style.display="block";
+
+document.getElementById("categoryText").innerText="Category: "+data.category;
+document.getElementById("riskText").innerText="Risk Level: "+data.risk;
+
+let html="";
+data.top3.forEach((d,i)=>{
+html+=`
+<div class="result-card">
+<b>${i+1}. ${d.disease}</b><br>
+Confidence: ${d.confidence}%
+</div>`;
+});
+
+document.getElementById("top3Box").innerHTML=html;
+
+},4500);
+});
+</script>
+
+</body>
+</html>
