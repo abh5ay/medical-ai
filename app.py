@@ -2,6 +2,16 @@ from flask import Flask, render_template, request, jsonify
 import pickle
 import warnings
 import numpy as np
+import os
+import pickle
+
+if not os.path.exists("model/disease_model.pkl"):
+    print("⚙ Training model on server...")
+    import train_model   # this will run training file automatically
+
+disease_model = pickle.load(open("model/disease_model.pkl","rb"))
+category_model = pickle.load(open("model/category_model.pkl","rb"))
+encoders = pickle.load(open("model/encoders.pkl","rb"))
 
 warnings.filterwarnings("ignore")
 
