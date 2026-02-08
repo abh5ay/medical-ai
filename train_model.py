@@ -1,8 +1,13 @@
+
+import os
+
+
 import pandas as pd
 import pickle
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 
+os.makedirs("model", exist_ok=True)
 print("Training medical AI system...")
 
 df = pd.read_csv("Disease_symptom_and_patient_profile_dataset.csv")
